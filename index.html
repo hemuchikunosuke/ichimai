@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="一日一枚">
+<meta name="theme-color" content="#f3f1ec">
+<title>一日一枚</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 静かな美術館。一日一度、一枚と、ひとつの言葉に向き合う
+   IDEA: 美術館の壁に掛かる作品札（キャプション）と、床の間の掛け軸
+   PICTURE: 時代の色で塗られた大きな作品札。題名が絵の代わりに主役になる
+   COLOUR and TYPE: 壁の白と墨、差し色は時代ごとの一色 / しっぽり明朝＋Zen角ゴシック
+   LAYOUT: 縦一列、片手で読める。下に固定の操作バー */
+:root{color-scheme:light dark;--bg:light-dark(#f3f1ec,#121211);--ink:light-dark(#1b1a18,#ecebe7);--sub:light-dark(#6d6a63,#a19e97);--line:light-dark(#dcd8cf,#2c2b29);--card:light-dark(#fff,#1c1b1a);--ac:#3e6b4a}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.8 "Zen Kaku Gothic New",system-ui,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:640px;margin:0 auto;padding:max(env(safe-area-inset-top),16px) 20px calc(100px + env(safe-area-inset-bottom))}
+header{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0 14px}
+.date{font-family:"Shippori Mincho",serif;font-size:20px;font-weight:700}
+.date small{font:500 13px "Zen Kaku Gothic New",sans-serif;color:var(--sub);margin-left:8px}
+.badge{font-size:13px;color:var(--sub)}
+.plate{position:relative;margin:0 -20px;padding:28px 24px 24px;min-height:46vh;display:flex;flex-direction:column;justify-content:flex-end;background:var(--ac);color:#fff;overflow:hidden}
+.plate::before{content:"";position:absolute;inset:18px;border:1px solid rgba(255,255,255,.28);pointer-events:none}
+.plate .era{position:absolute;top:30px;left:34px;font-size:13px;opacity:.85}
+.plate .no{position:absolute;top:30px;right:34px;font-size:13px;opacity:.7;font-variant-numeric:tabular-nums}
+.plate h1{font-family:"Shippori Mincho",serif;font-weight:800;font-size:clamp(30px,8.5vw,46px);line-height:1.2;margin:0 10px 10px;text-wrap:balance}
+.plate .who{margin:0 10px 18px;font-size:15px;opacity:.92}
+.see{display:flex;gap:8px;flex-wrap:wrap;margin:0 10px}
+.see a{flex:1 1 150px;text-align:center;min-height:44px;line-height:44px;border-radius:999px;text-decoration:none;font-size:14px;font-weight:500;background:#fff;color:var(--ac)}
+.see a+a{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.6)}
+section.k{padding:18px 0;border-bottom:1px solid var(--line)}
+section.k:first-child{padding-top:22px}
+section.k h2{font-size:13px;font-weight:500;color:light-dark(var(--ac),#cfcac0);margin:0 0 4px;letter-spacing:.04em}
+section.k p{margin:0}
+.card{margin:18px 0 0;background:var(--card);border-radius:18px;padding:18px;border:1px solid var(--line)}
+.card .t{font-size:13px;color:var(--sub);margin:0}
+.card .p{font-family:"Shippori Mincho",serif;font-size:19px;font-weight:700;margin:2px 0 6px;line-height:1.4}
+.card .w{font-size:15px;margin:0 0 14px;color:var(--sub)}
+.links{display:flex;gap:10px;flex-wrap:wrap}
+.links a{flex:1 1 130px;text-align:center;min-height:44px;line-height:44px;border-radius:12px;text-decoration:none;font-size:15px;font-weight:500;background:var(--ink);color:var(--bg)}
+.links a+a{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.zen{text-align:center;padding:26px 18px 18px}
+.zen .z{font-family:"Shippori Mincho",serif;font-weight:800;font-size:clamp(30px,9vw,42px);line-height:1.3;margin:6px 0 2px;letter-spacing:.08em}
+.zen .r{font-size:13px;color:var(--sub);margin:0 0 12px}
+.zen .m{margin:0 0 16px;font-size:16px}
+.memo{margin-top:14px;text-align:left}
+.memo label{display:block;font-size:13px;color:var(--sub);margin-bottom:6px}
+.memo textarea{width:100%;min-height:96px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:16px/1.7 "Zen Kaku Gothic New",sans-serif;padding:10px 12px;resize:vertical}
+.memo .saved{font-size:13px;color:var(--sub);min-height:1.4em;margin:4px 0 0}
+.note{font-size:13px;color:var(--sub);margin:18px 0 0}
+nav{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:6px;z-index:5}
+nav button{flex:1;max-width:150px;min-height:48px;border:0;border-radius:14px;background:transparent;color:var(--ink);font:500 15px "Zen Kaku Gothic New",sans-serif;cursor:pointer}
+nav button:disabled{opacity:.3}
+button:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+#fav.on{color:#c43c3c}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:flex-end;z-index:9}
+.sheet.open{display:flex}
+.sheet>div{background:var(--bg);width:100%;max-width:640px;margin:0 auto;border-radius:20px 20px 0 0;padding:16px 20px calc(20px + env(safe-area-inset-bottom));max-height:80vh;overflow:auto}
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.tabs button,.chips button{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);font:500 14px "Zen Kaku Gothic New",sans-serif;cursor:pointer}
+.tabs button[aria-pressed=true],.chips button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:4px}
+.chips button{flex:none;min-height:36px;font-size:13px}
+.row{display:flex;justify-content:space-between;gap:12px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:13px 0;color:var(--ink);font:16px/1.5 "Zen Kaku Gothic New",sans-serif;cursor:pointer}
+.row span{color:var(--sub);font-size:13px;white-space:nowrap}
+.row i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.empty{color:var(--sub);font-size:15px}
+.load{padding:40vh 0;text-align:center;color:var(--sub)}
+.fade{animation:f .45s ease}@keyframes f{from{opacity:0;transform:translateY(6px)}}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="main"><p class="load" id="load">今日の一枚を用意しています…</p></div>
+<nav>
+  <button id="prev" aria-label="前の日">← 前の日</button>
+  <button id="fav" aria-label="好き">♡ 好き</button>
+  <button id="list" aria-label="一覧">一覧</button>
+  <button id="next" aria-label="次の日">次の日 →</button>
+</nav>
+<div class="sheet" id="sheet"><div>
+  <div class="tabs"><button id="tFav" aria-pressed="true">好きな絵</button><button id="tSeen" aria-pressed="false">これまでの絵</button></div>
+  <div class="chips" id="chips"></div>
+  <div id="rows"></div>
+</div></div>
+
+<script>
+{
+const ERA={"古代〜中世":"#8a5a2b","ルネサンス〜バロック":"#6b2a2a","18〜19世紀前半":"#2f4a6b","写実〜ポスト印象派":"#3e6b4a","日本美術":"#a2372a","近代":"#3b3a6e","戦後〜1970年代":"#262624","1980年代〜現代":"#b8124a"};
+const WD="日月火水木金土",DAY=864e5,MAXBACK=365;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let W=[],Z=[],off=0,favs=store.get("ichimai-favs2",[]),tab="fav",eraF="";
+
+const today=()=>{const n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate())};
+const dayAt=o=>new Date(today().getTime()+o*DAY);
+function idxFor(d){const s=new Date(d.getFullYear(),0,1);const n=Math.round((d-s)/DAY);const leap=new Date(d.getFullYear(),1,29).getDate()===29;return leap?n:Math.min(n,364)}
+const work=i=>{const w=W[i];return{t:w[0],a:w[1],y:w[2],era:w[3],life:w[4],eraT:w[5],mean:w[6],m:w[7],mw:w[8],z:Z[w[9]]}};
+const q=s=>encodeURIComponent(s);
+
+function render(){
+  const d=dayAt(off),i=idxFor(d),p=work(i),col=ERA[p.era]||"#3e6b4a";
+  document.documentElement.style.setProperty("--ac",col);
+  const mq=q(p.m.replace(/[「」『』]/g," "));
+  const sq=q(p.t.replace(/（.*?）/g,"")+" "+p.a);
+  const memo=store.get("ichimai-memo:"+p.t,"");
+  $("main").innerHTML=`
+  <header><div class="date">${d.getMonth()+1}月${d.getDate()}日<small>${WD[d.getDay()]}曜日</small></div><div class="badge">${off===0?"今日の一枚":`${-off}日前の一枚`}</div></header>
+  <div class="plate fade"><span class="era">${esc(p.era)}</span><span class="no">${i+1} / ${W.length}</span>
+   <h1>${esc(p.t)}</h1><p class="who">${esc(p.a)}　${esc(p.y)}</p>
+   <div class="see"><a href="https://artsandculture.google.com/search?q=${sq}" target="_blank" rel="noopener">Google Arts &amp; Cultureで見る</a><a href="https://www.google.com/search?tbm=isch&q=${sq}" target="_blank" rel="noopener">画像を検索</a></div></div>
+  <div class="fade">
+   <section class="k"><h2>作者の人生</h2><p>${esc(p.life)}</p></section>
+   <section class="k"><h2>時代</h2><p>${esc(p.eraT)}</p></section>
+   <section class="k"><h2>この絵の意味</h2><p>${esc(p.mean)}</p></section>
+   <div class="card"><p class="t">♪ この絵に添える一曲</p><p class="p">${esc(p.m)}</p><p class="w">${esc(p.mw)}</p>
+    <div class="links"><a href="https://music.youtube.com/search?q=${mq}" target="_blank" rel="noopener">YouTube Musicで聴く</a><a href="https://open.spotify.com/search/${mq}" target="_blank" rel="noopener">Spotify</a></div></div>
+   <div class="card zen"><p class="t">今日の禅語</p><p class="z">${esc(p.z[0])}</p><p class="r">${esc(p.z[1])}</p><p class="m">${esc(p.z[2])}</p>
+    <div class="links"><a href="https://www.youtube.com/results?search_query=${q("大愚和尚 "+p.z[3])}" target="_blank" rel="noopener">大愚和尚の話を聴く</a></div>
+    <div class="memo"><label for="memo">心に残った言葉（このスマホに保存）</label><textarea id="memo" placeholder="聴いて残った言葉、思ったこと">${esc(memo)}</textarea><p class="saved" id="saved"></p></div></div>
+   <p class="note">禅語は昔から伝わる言葉で、意味の説明はこのアプリで書いたものです。大愚和尚の動画はYouTubeの検索結果に移ります。</p>
+  </div>`;
+  const ta=$("memo");let tm;
+  ta.addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(()=>{store.set("ichimai-memo:"+p.t,ta.value);$("saved").textContent="保存しました"},400)});
+  $("prev").disabled=off<=-MAXBACK;$("next").disabled=off>=0;
+  const on=favs.includes(p.t);$("fav").classList.toggle("on",on);$("fav").textContent=on?"♥ 好き":"♡ 好き";
+  window.scrollTo({top:0});
+}
+function go(n){const v=off+n;if(v>0||v<-MAXBACK)return;off=v;render()}
+
+function listRows(){
+  let items=[];
+  if(tab==="fav"){
+    for(let k=0;k<=MAXBACK;k++){const i=idxFor(dayAt(-k));const w=work(i);if(favs.includes(w.t)&&!items.some(x=>x.w.t===w.t))items.push({k,w})}
+  }else{
+    for(let k=0;k<=MAXBACK;k++){const w=work(idxFor(dayAt(-k)));if(!eraF||w.era===eraF)items.push({k,w})}
+  }
+  $("chips").style.display=tab==="seen"?"flex":"none";
+  $("chips").innerHTML=[["","すべて"],...Object.keys(ERA).map(e=>[e,e])].map(([v,l])=>`<button data-e="${esc(v)}" aria-pressed="${v===eraF}">${esc(l)}</button>`).join("");
+  $("rows").innerHTML=items.length?items.map(({k,w})=>{const d=dayAt(-k);return `<button class="row" data-k="${k}"><div><i style="background:${ERA[w.era]}"></i>${esc(w.t)}</div><span>${d.getMonth()+1}/${d.getDate()}</span></button>`}).join(""):`<p class="empty">${tab==="fav"?"♡を押した絵がここに並びます。":"この時代の絵には、まだ出会っていません。"}</p>`;
+  $("tFav").setAttribute("aria-pressed",tab==="fav");$("tSeen").setAttribute("aria-pressed",tab==="seen");
+}
+$("prev").addEventListener("click",()=>go(-1));
+$("next").addEventListener("click",()=>go(1));
+$("fav").addEventListener("click",()=>{const t=work(idxFor(dayAt(off))).t;favs=favs.includes(t)?favs.filter(x=>x!==t):[...favs,t];store.set("ichimai-favs2",favs);render()});
+$("list").addEventListener("click",()=>{listRows();$("sheet").classList.add("open")});
+$("tFav").addEventListener("click",()=>{tab="fav";listRows()});
+$("tSeen").addEventListener("click",()=>{tab="seen";listRows()});
+$("chips").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;eraF=b.dataset.e;listRows()});
+$("sheet").addEventListener("click",e=>{const b=e.target.closest(".row");if(b){off=-(+b.dataset.k);render();$("sheet").classList.remove("open")}else if(e.target===$("sheet"))$("sheet").classList.remove("open")});
+let sx=null,sy=0;
+$("main").addEventListener("touchstart",e=>{if(e.target.closest("textarea"))return;sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+$("main").addEventListener("touchend",e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5)go(dx>0?-1:1);sx=null},{passive:true});
+document.addEventListener("keydown",e=>{if(e.target.tagName==="TEXTAREA")return;if(e.key==="ArrowLeft")go(-1);if(e.key==="ArrowRight")go(1);if(e.key==="Escape")$("sheet").classList.remove("open")});
+let lastDay=today().getTime();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&today().getTime()!==lastDay){lastDay=today().getTime();off=0;render()}});
+fetch("data.json").then(r=>r.json()).then(d=>{W=d.works;Z=d.zen;render()}).catch(()=>{$("load").textContent="作品データ（data.json）を読み込めませんでした。index.htmlと同じ場所に置いてください。"});
+}
+</script>
+</body>
+</html>
